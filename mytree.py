@@ -36,6 +36,75 @@ class TreeNode(object):
         for child in self.children:
             child.print_preorder()
 
+    def dfs(self, value):
+        if (value == self.value):
+            return true
+        if self.children:
+            for child in self.children:
+                found = dfs(child, value)
+        return false
+
+    def bfs(self, value):
+        q = []
+        q.push(self)
+        while(q):
+            node = q.pop(0)
+            if (value == node.value):
+                return true
+            if node.children:
+                q.extend(node.children)
+        return false
+
+    def distance(self, value):
+        """Returns the distance between the current node and a node with value
+
+        Returns -1 if no link can be found
+        """
+        q = []
+        distance = 0
+        q.push([self, 0])
+        while (q):
+            node, distance = q.pop(0)
+            if (value == node.value):
+                return distance
+            if node.children:
+                for child in node.children:
+                    q.push([child, distance+1])
+        return -1
+
+    def height(self):
+        return self._height_helper(0)
+
+    def _height_helper(self, depth):
+        heights = []
+        for child in self.children:
+            height = child._height_helper(depth + 1)
+            heights.append(height)
+        print("in loop: %s %s, heights=%s" % (self, depth, heights))
+        if heights:
+            return max(heights)
+        else:
+            return depth
+
+    @staticmethod
+    def bst_from_sorted(array):
+        def median(array):
+            return int(len(array)/2)
+        if array:
+            mid = median(array)
+            node = TreeNode(array[mid])
+            print("BST array: %s" % array)
+            if array[:mid]:
+                node.add_child(TreeNode.bst_from_sorted(array[:mid]))
+            if array[mid+1:]:
+                node.add_child(TreeNode.bst_from_sorted(array[mid+1:]))
+            print("BST node after children: %s" % node)
+            return node
+        else:
+            return
+
+
+
 class NaryTree(object):
     def __init__(self, n, node=None):
         self.root = node
@@ -47,12 +116,12 @@ class NaryTree(object):
         node_list = []
         for val in array:
             node_list.append(TreeNode(val))
-        
+
         for i in range(0,int( len(node_list)/n)):
             for j in range(1, n+1):
                 if (n*(i+1) - n + j < len(node_list)):
                     node_list[i].add_child(node_list[n*(i+1) - n + j])
-            
+
         return clazz(node_list[0])
 
     def print_preorder(self):
@@ -80,7 +149,6 @@ class BinarySearchTree(BinaryTree):
     def from_sorted_array(clazz, array):
         def find_median(array):
             return int(len(array)/2)
-
         q = []
         arr = []
         q.append(array)
@@ -106,6 +174,7 @@ def main():
     ttree.print_preorder()
 
     arr = [1,2,3,4,5,6,7,8,9]
+    dup = list(arr)
     print("Tree: %s" % arr)
     btree = BinaryTree.from_array(arr)
     bstree = BinarySearchTree.from_sorted_array(arr)
@@ -114,9 +183,14 @@ def main():
     btree.print_inorder()
     print("Bst tree in order:")
     bstree.print_inorder()
-
     print("B tree preorder:")
     btree.print_preorder()
+
+    actual_bstree = TreeNode.bst_from_sorted(dup)
+
+    print("Heights:")
+    print("BST root height: %s" % actual_bstree.height())
+    print("3 tree root height: %s" % ttree.root.height())
 
 if __name__ == "__main__":
     main()
